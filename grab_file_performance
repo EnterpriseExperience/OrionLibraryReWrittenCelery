@@ -86,25 +86,25 @@ FPSLabel.Font = Enum.Font.SourceSansBold
 FPSLabel.Text = "Loading..."
 
 if identifyexecutor then
-  local ExecutorLabel = Instance.new("TextLabel")
-  ExecutorLabel.Name = "ExecutorLabel"
-  ExecutorLabel.Parent = UIContainer
-  ExecutorLabel.Size = UDim2.new(0, 200, 1, 0)
-  ExecutorLabel.Position = UDim2.new(0, 480, 0, 0)
-  ExecutorLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-  ExecutorLabel.BackgroundTransparency = 1
-  ExecutorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-  ExecutorLabel.TextScaled = true
-  ExecutorLabel.Font = Enum.Font.SourceSansBold
-  ExecutorLabel.Text = "Detecting Executor..."
-  
-  local function detectExecutor() 
-      local name, version
-      if identifyexecutor then 
-          name, version = identifyexecutor()
-      end
-      return { Name = name or "", Version = version or "" }
-  end
+    local ExecutorLabel = Instance.new("TextLabel")
+    ExecutorLabel.Name = "ExecutorLabel"
+    ExecutorLabel.Parent = UIContainer
+    ExecutorLabel.Size = UDim2.new(0, 200, 1, 0)
+    ExecutorLabel.Position = UDim2.new(0, 480, 0, 0)
+    ExecutorLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    ExecutorLabel.BackgroundTransparency = 1
+    ExecutorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ExecutorLabel.TextScaled = true
+    ExecutorLabel.Font = Enum.Font.SourceSansBold
+    ExecutorLabel.Text = "Detecting Executor..."
+    
+    local function detectExecutor() 
+        local name, version
+        if identifyexecutor then 
+            name, version = detectExecutor()
+        end
+        return { Name = name or "", Version = version or "" }
+    end
 end
 
 task.spawn(function()
