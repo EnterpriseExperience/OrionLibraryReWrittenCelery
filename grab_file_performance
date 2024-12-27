@@ -2,6 +2,7 @@ local CoreGui
 local Players
 local RunService
 local Stats
+local UserInputService = game:GetService("UserInputService")
 
 if cloneref then
     Players = cloneref(game:GetService("Players"))
@@ -71,7 +72,7 @@ PingLabel.BackgroundTransparency = 1
 PingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 PingLabel.TextScaled = true
 PingLabel.Font = Enum.Font.SourceSansBold
-PingLabel.Text = "Loading..."
+PingLabel.Text = "Detecting Ping..."
 
 local FPSLabel = Instance.new("TextLabel")
 FPSLabel.Name = "FPSLabel"
@@ -83,15 +84,7 @@ FPSLabel.BackgroundTransparency = 1
 FPSLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 FPSLabel.TextScaled = true
 FPSLabel.Font = Enum.Font.SourceSansBold
-FPSLabel.Text = "Loading..."
-
-local function getExecutor() 
-    local name, version
-    if identifyexecutor then 
-        name, version = identifyexecutor()
-    end
-    return { Name = name or "Unknown Executor", Version = version or "Unknown Version" }
-end
+FPSLabel.Text = "Detecting FPS..."
 
 local ExecutorLabel = Instance.new("TextLabel")
 ExecutorLabel.Name = "ExecutorLabel"
@@ -105,6 +98,34 @@ ExecutorLabel.TextScaled = true
 ExecutorLabel.Font = Enum.Font.SourceSansBold
 ExecutorLabel.Text = "Detecting Executor..."
 
+local PCStatusLabel = Instance.new("TextLabel")
+PCStatusLabel.Name = "PCStatusLabel"
+PCStatusLabel.Parent = UIContainer
+PCStatusLabel.Size = UDim2.new(0, 200, 1, 0)
+PCStatusLabel.Position = UDim2.new(0, 680, 0, 0)
+PCStatusLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+PCStatusLabel.BackgroundTransparency = 1
+PCStatusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+PCStatusLabel.TextScaled = true
+PCStatusLabel.Font = Enum.Font.SourceSansBold
+PCStatusLabel.Text = "Detecting Device..."
+
+local function getExecutor()
+    local name, version
+    if identifyexecutor then
+        name, version = identifyexecutor()
+    end
+    return { Name = name or "Unknown Executor", Version = version or "Unknown Version" }
+end
+
+local function isPC()
+    if UserInputService.TouchEnabled == true then
+        return "Mobile"
+    else
+        return "PC"
+    end
+end
+
 local function detectExecutor()
     local executorDetails = getExecutor()
     return string.format("%s (v%s)", executorDetails.Name, executorDetails.Version)
@@ -113,6 +134,10 @@ end
 task.spawn(function()
     local executorName = detectExecutor()
     ExecutorLabel.Text = "Executor: " .. executorName
+end)
+
+task.spawn(function()
+    PCStatusLabel.Text = "Device: " .. isPC()
 end)
 
 local isUIVisible = true
