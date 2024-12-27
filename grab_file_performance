@@ -38,7 +38,7 @@ ToggleButton.BorderSizePixel = 0
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.TextScaled = true
 ToggleButton.Font = Enum.Font.SourceSansBold
-ToggleButton.Text = "Toggle UI"
+ToggleButton.Text = "Hide UI"
 
 local UIContainer = Instance.new("Frame")
 UIContainer.Name = "UIContainer"
