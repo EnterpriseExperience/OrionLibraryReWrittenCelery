@@ -118,11 +118,51 @@ local function getExecutor()
     return { Name = name or "Unknown Executor", Version = version or "Unknown Version" }
 end
 
-local function isPC()
-    if UserInputService.TouchEnabled == true then
-        return "Mobile"
-    else
-        return "PC"
+local function Device_Detector()
+    local UserInputService = game:GetService("UserInputService")
+
+    if UserInputService:GetPlatform() == Enum.Platform.Windows then
+        return "Windows"
+    elseif UserInputService:GetPlatform() == Enum.Platform.OSX then
+        return "OSX" or "Apple Desktop"
+    elseif UserInputService:GetPlatform() == Enum.Platform.IOS then
+        return "iOS"
+    elseif UserInputService:GetPlatform() == Enum.Platform.Android then
+        return "Android"
+    elseif UserInputService:GetPlatform() == Enum.Platform.XBoxOne then
+        return "Xbox One (Console)"
+    elseif UserInputService:GetPlatform() == Enum.Platform.PS4 then
+        return "PS4 (Console)"
+    elseif UserInputService:GetPlatform() == Enum.Platform.XBox360 then
+        return "Xbox 360 (Console)"
+    elseif UserInputService:GetPlatform() == Enum.Platform.WiiU then
+        return "Wii-U (Console)"
+    elseif UserInputService:GetPlatform() == Enum.Platform.NX then
+        return "Cisco Nexus"
+    elseif UserInputService:GetPlatform() == Enum.Platform.Ouya then
+        return "Ouya (Android-Based)"
+    elseif UserInputService:GetPlatform() == Enum.Platform.AndroidTV then
+        return "Android TV"
+    elseif UserInputService:GetPlatform() == Enum.Platform.Chromecast then
+        return "Chromecast"
+    elseif UserInputService:GetPlatform() == Enum.Platform.Linux then
+        return "Linux (Desktop)"
+    elseif UserInputService:GetPlatform() == Enum.Platform.SteamOS then
+        return "Steam Client"
+    elseif UserInputService:GetPlatform() == Enum.Platform.WebOS then
+        return "Web-OS"
+    elseif UserInputService:GetPlatform() == Enum.Platform.DOS then
+        return "DOS"
+    elseif UserInputService:GetPlatform() == Enum.Platform.BeOS then
+        return "BeOS"
+    elseif UserInputService:GetPlatform() == Enum.Platform.UWP then
+        return "UWP (Go Back To Web Bro..)"
+    elseif UserInputService:GetPlatform() == Enum.Platform.PS5 then
+        return "PS5 (Console)"
+    elseif UserInputService:GetPlatform() == Enum.Platform.MetaOS then
+        return "MetaOS"
+    elseif UserInputService:GetPlatform() == Enum.Platform.None then
+        return "Unknown Device"
     end
 end
 
@@ -137,7 +177,7 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-    PCStatusLabel.Text = "Device: " .. isPC()
+    PCStatusLabel.Text = "Device: " .. Device_Detector()
 end)
 
 local isUIVisible = true
@@ -169,7 +209,7 @@ local function updateTime()
         local regionTimeZone = timeZones[offset] or "Unknown Time Zone"
         local formattedTime = os.date("%I:%M:%S %p", currentTime):gsub("^0", "")
         TimeLabel.Text = string.format("%s (%s)", formattedTime, regionTimeZone)
-        task.wait(1)
+        task.wait(1.2)
     end
 end
 
@@ -195,7 +235,7 @@ local function updatePing()
     while getgenv().preserve_ping_tick == true do
         local ping = math.floor(Stats.PerformanceStats.Ping:GetValue())
         PingLabel.Text = ping .. " ms"
-        task.wait(0.3)
+        task.wait(0.7)
     end
 end
 
