@@ -5,13 +5,13 @@ local Stats
 local UserInputService = game:GetService("UserInputService")
 
 if cloneref then
-    Players = cloneref(game:GetService("Players"))
-    RunService = cloneref(game:GetService("RunService"))
-    Stats = cloneref(game:GetService("Stats"))
+   Players = cloneref(game:GetService("Players"))
+   RunService = cloneref(game:GetService("RunService"))
+   Stats = cloneref(game:GetService("Stats"))
 else
-    Players = game:GetService("Players")
-    RunService = game:GetService("RunService")
-    Stats = game:GetService("Stats")
+   Players = game:GetService("Players")
+   RunService = game:GetService("RunService")
+   Stats = game:GetService("Stats")
 end
 
 task.wait(0.1)
@@ -43,12 +43,21 @@ ToggleButton.Text = "Hide UI"
 local UIContainer = Instance.new("Frame")
 UIContainer.Name = "UIContainer"
 UIContainer.Parent = ScreenGui
-UIContainer.Size = UDim2.new(0, 975, 0, 40)
-UIContainer.Position = UDim2.new(0.5, -370, 0, 0)
-UIContainer.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+UIContainer.Size = UDim2.new(0, 1105, 0, 40)
+UIContainer.Position = UDim2.new(0.5, -550, 0, 0)
+UIContainer.BackgroundColor3 = Color3.fromRGB(85, 0, 0)
 UIContainer.BackgroundTransparency = 0.2
 UIContainer.BorderSizePixel = 0
 UIContainer.Visible = true
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = UIContainer
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = Color3.fromRGB(50, 50, 50)
+UIStroke.Thickness = 1
+UIStroke.Parent = UIContainer
 
 local TimeLabel = Instance.new("TextLabel")
 TimeLabel.Name = "TimeLabel"
@@ -109,6 +118,29 @@ PCStatusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 PCStatusLabel.TextScaled = true
 PCStatusLabel.Font = Enum.Font.SourceSansBold
 PCStatusLabel.Text = "Detecting Device..."
+
+_G.Player_Counting_Value = true
+
+local PlayerCountLabel = Instance.new("TextLabel")
+PlayerCountLabel.Name = "PlayerCountLabel"
+PlayerCountLabel.Parent = UIContainer
+PlayerCountLabel.Size = UDim2.new(0, 200, 1, 0)
+PlayerCountLabel.Position = UDim2.new(0, 900, 0, 0)
+PlayerCountLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+PlayerCountLabel.BackgroundTransparency = 1
+PlayerCountLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+PlayerCountLabel.TextScaled = true
+PlayerCountLabel.Font = Enum.Font.SourceSansBold
+PlayerCountLabel.Text = "Players: Detecting..."
+
+task.spawn(function()
+   while _G.Player_Counting_Value == true do
+      local player_count = #Players:GetPlayers()
+      local max_players = Players.MaxPlayersInternal
+      PlayerCountLabel.Text = "Players: " .. tostring(player_count) .. "/" .. tostring(max_players)
+      task.wait(1)
+   end
+end)
 
 local function getExecutor()
     local name, version
