@@ -1,3 +1,7 @@
+if getgenv().performance_stats then
+   return 
+end
+
 local CoreGui
 local Players
 local RunService
@@ -219,6 +223,8 @@ ToggleButton.MouseButton1Click:Connect(function()
     UIContainer.Visible = isUIVisible
     ToggleButton.Text = isUIVisible and "Hide UI" or "Show UI"
 end)
+
+getgenv().performance_stats = true
 
 local timeZones = {
     ["-1200"] = "AoE", ["-1100"] = "SST", ["-1000"] = "HST", ["-0930"] = "MART",
