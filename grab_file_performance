@@ -123,7 +123,7 @@ PCStatusLabel.TextScaled = true
 PCStatusLabel.Font = Enum.Font.SourceSansBold
 PCStatusLabel.Text = "Detecting Device..."
 
-_G.Player_Counting_Value = true
+getgenv().Player_Counting_Value = true
 
 local PlayerCountLabel = Instance.new("TextLabel")
 PlayerCountLabel.Name = "PlayerCountLabel"
@@ -138,11 +138,11 @@ PlayerCountLabel.Font = Enum.Font.SourceSansBold
 PlayerCountLabel.Text = "Players: Detecting..."
 
 task.spawn(function()
-   while _G.Player_Counting_Value == true do
+   while getgenv().Player_Counting_Value == true do
       local player_count = #Players:GetPlayers()
       local max_players = Players.MaxPlayersInternal
       PlayerCountLabel.Text = "Players: " .. tostring(player_count) .. "/" .. tostring(max_players)
-      task.wait(1)
+      task.wait(0.3)
    end
 end)
 
