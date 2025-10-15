@@ -48,7 +48,7 @@ ToggleButton.Font = Enum.Font.SourceSansBold
 ToggleButton.Text = "Hide UI"
 
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.CornerRadius = UDim.new(0, 20)
 UICorner.Parent = ToggleButton
 
 local UIContainer = Instance.new("Frame")
