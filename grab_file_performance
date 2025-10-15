@@ -6,6 +6,7 @@ local CoreGui
 local Players
 local RunService
 local Stats
+local UserInputService
 
 if cloneref then
     UserInputService = cloneref(game:GetService("UserInputService"))
