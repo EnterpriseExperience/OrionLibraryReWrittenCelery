@@ -270,7 +270,7 @@ local function update_time()
     end
 end
 
-task.spawn(updateTime)
+task.spawn(update_time)
 
 local frameCount = 0
 local timeElapsed = 0
