@@ -6,16 +6,19 @@ local CoreGui
 local Players
 local RunService
 local Stats
-local UserInputService = game:GetService("UserInputService")
 
 if cloneref then
-   Players = cloneref(game:GetService("Players"))
-   RunService = cloneref(game:GetService("RunService"))
-   Stats = cloneref(game:GetService("Stats"))
+    UserInputService = cloneref(game:GetService("UserInputService"))
+    Players = cloneref(game:GetService("Players"))
+    RunService = cloneref(game:GetService("RunService"))
+    Stats = cloneref(game:GetService("Stats"))
+    CoreGui = cloneref(game:GetService("CoreGui"))
 else
-   Players = game:GetService("Players")
-   RunService = game:GetService("RunService")
-   Stats = game:GetService("Stats")
+    UserInputService = game:GetService("UserInputService")
+    Players = game:GetService("Players")
+    RunService = game:GetService("RunService")
+    Stats = game:GetService("Stats")
+    CoreGui = game:GetService("CoreGui")
 end
 
 task.wait(0.1)
@@ -25,7 +28,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "TopBarUI"
 if get_hidden_gui or gethui then
     local hiddenUI = get_hidden_gui or gethui
-    ScreenGui.Parent = hiddenUI()
+    ScreenGui.Parent = hiddenUI() or CoreGui
 else
     ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 end
@@ -35,21 +38,25 @@ ScreenGui.ResetOnSpawn = false
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Name = "ToggleButton"
 ToggleButton.Parent = ScreenGui
-ToggleButton.Size = UDim2.new(0, 150, 0, 30)
-ToggleButton.Position = UDim2.new(1, -160, 0, 10)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+ToggleButton.Size = UDim2.new(0, 100, 0, 30)
+ToggleButton.Position = UDim2.new(1, -130, 0, 10)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 ToggleButton.BorderSizePixel = 0
-ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.TextColor3 = Color3.fromRGB(0, 255, 0)
 ToggleButton.TextScaled = true
 ToggleButton.Font = Enum.Font.SourceSansBold
 ToggleButton.Text = "Hide UI"
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = ToggleButton
 
 local UIContainer = Instance.new("Frame")
 UIContainer.Name = "UIContainer"
 UIContainer.Parent = ScreenGui
 UIContainer.Size = UDim2.new(0, 1105, 0, 40)
 UIContainer.Position = UDim2.new(0.5, -550, 0, 0)
-UIContainer.BackgroundColor3 = Color3.fromRGB(85, 0, 0)
+UIContainer.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
 UIContainer.BackgroundTransparency = 0.2
 UIContainer.BorderSizePixel = 0
 UIContainer.Visible = true
@@ -59,7 +66,7 @@ UICorner.CornerRadius = UDim.new(0, 8)
 UICorner.Parent = UIContainer
 
 local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(50, 50, 50)
+UIStroke.Color = Color3.fromRGB(0, 0, 0)
 UIStroke.Thickness = 1
 UIStroke.Parent = UIContainer
 
@@ -68,9 +75,9 @@ TimeLabel.Name = "TimeLabel"
 TimeLabel.Parent = UIContainer
 TimeLabel.Size = UDim2.new(0, 150, 1, 0)
 TimeLabel.Position = UDim2.new(0, 0, 0, 0)
-TimeLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+TimeLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 TimeLabel.BackgroundTransparency = 1
-TimeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TimeLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
 TimeLabel.TextScaled = true
 TimeLabel.Font = Enum.Font.SourceSansBold
 TimeLabel.Text = "Loading..."
@@ -80,9 +87,9 @@ PingLabel.Name = "PingLabel"
 PingLabel.Parent = UIContainer
 PingLabel.Size = UDim2.new(0, 150, 1, 0)
 PingLabel.Position = UDim2.new(0, 160, 0, 0)
-PingLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+PingLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 PingLabel.BackgroundTransparency = 1
-PingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+PingLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
 PingLabel.TextScaled = true
 PingLabel.Font = Enum.Font.SourceSansBold
 PingLabel.Text = "Detecting Ping..."
@@ -92,9 +99,9 @@ FPSLabel.Name = "FPSLabel"
 FPSLabel.Parent = UIContainer
 FPSLabel.Size = UDim2.new(0, 150, 1, 0)
 FPSLabel.Position = UDim2.new(0, 320, 0, 0)
-FPSLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+FPSLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 FPSLabel.BackgroundTransparency = 1
-FPSLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+FPSLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
 FPSLabel.TextScaled = true
 FPSLabel.Font = Enum.Font.SourceSansBold
 FPSLabel.Text = "Detecting FPS..."
@@ -104,9 +111,9 @@ ExecutorLabel.Name = "ExecutorLabel"
 ExecutorLabel.Parent = UIContainer
 ExecutorLabel.Size = UDim2.new(0, 200, 1, 0)
 ExecutorLabel.Position = UDim2.new(0, 480, 0, 0)
-ExecutorLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+ExecutorLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 ExecutorLabel.BackgroundTransparency = 1
-ExecutorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ExecutorLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
 ExecutorLabel.TextScaled = true
 ExecutorLabel.Font = Enum.Font.SourceSansBold
 ExecutorLabel.Text = "Detecting Executor..."
@@ -116,9 +123,9 @@ PCStatusLabel.Name = "PCStatusLabel"
 PCStatusLabel.Parent = UIContainer
 PCStatusLabel.Size = UDim2.new(0, 190, 1, 0)
 PCStatusLabel.Position = UDim2.new(0, 700, 0, 0)
-PCStatusLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+PCStatusLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 PCStatusLabel.BackgroundTransparency = 1
-PCStatusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+PCStatusLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
 PCStatusLabel.TextScaled = true
 PCStatusLabel.Font = Enum.Font.SourceSansBold
 PCStatusLabel.Text = "Detecting Device..."
@@ -130,9 +137,9 @@ PlayerCountLabel.Name = "PlayerCountLabel"
 PlayerCountLabel.Parent = UIContainer
 PlayerCountLabel.Size = UDim2.new(0, 200, 1, 0)
 PlayerCountLabel.Position = UDim2.new(0, 900, 0, 0)
-PlayerCountLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+PlayerCountLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 PlayerCountLabel.BackgroundTransparency = 1
-PlayerCountLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+PlayerCountLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
 PlayerCountLabel.TextScaled = true
 PlayerCountLabel.Font = Enum.Font.SourceSansBold
 PlayerCountLabel.Text = "Players: Detecting..."
@@ -155,7 +162,7 @@ local function getExecutor()
 end
 
 local function Device_Detector()
-    local UserInputService = game:GetService("UserInputService")
+    local UserInputService = UserInputService
 
     if UserInputService:GetPlatform() == Enum.Platform.Windows then
         return "Windows"
@@ -239,14 +246,26 @@ local timeZones = {
     ["+1300"] = "PHOT", ["+1400"] = "LINT"
 }
 
-local function updateTime()
+-- [[ fix for eastern (sometimes northern) regions that have multiple monthly zones. ]] --
+local function get_eastern_label(offset)
+    if offset == "-0500" or offset == "-0400" then
+        local month = tonumber(os.date("%m"))
+        if month >= 3 and month <= 11 then
+            return "EDT"
+        else
+            return "EST"
+        end
+    end
+end
+
+local function update_time()
     getgenv().tickingTime = true
     while getgenv().tickingTime == true do
         local currentTime = os.time()
         local offset = os.date("%z", currentTime)
-        local regionTimeZone = timeZones[offset] or "Unknown Time Zone"
+        local regionTimeZone = get_eastern_label(offset) or timeZones[offset] or "Unknown Time Zone"
         local formattedTime = os.date("%I:%M:%S %p", currentTime):gsub("^0", "")
-        TimeLabel.Text = string.format("%s (%s)", formattedTime, regionTimeZone)
+        TimeLabel.Text = "Time: "..string.format("%s (%s)", formattedTime, regionTimeZone)
         task.wait(1.2)
     end
 end
@@ -260,7 +279,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
     frameCount = frameCount + 1
     timeElapsed = timeElapsed + deltaTime
     if timeElapsed >= 1 then
-        FPSLabel.Text = frameCount .. " FPS"
+        FPSLabel.Text = "FPS: "..tostring(frameCount)
         frameCount = 0
         timeElapsed = 0
     end
@@ -272,8 +291,8 @@ local function updatePing()
     getgenv().preserve_ping_tick = true
     while getgenv().preserve_ping_tick == true do
         local ping = math.floor(Stats.PerformanceStats.Ping:GetValue())
-        PingLabel.Text = ping .. " ms"
-        task.wait(0.7)
+        PingLabel.Text = "Ping: "..tostring(ping).." ms"
+        task.wait(0.6)
     end
 end
 
