@@ -1,157 +1,112 @@
-if getgenv().performance_stats then
-   return 
-end
+if getgenv().performance_stats then return end
+getgenv().performance_stats = true
 
-local CoreGui
-local Players
-local RunService
-local Stats
-local UserInputService
+local CoreGui, Players, RunService, Stats, UserInputService, TweenService
 
-if cloneref then
-    UserInputService = cloneref(game:GetService("UserInputService"))
-    Players = cloneref(game:GetService("Players"))
-    RunService = cloneref(game:GetService("RunService"))
-    Stats = cloneref(game:GetService("Stats"))
-    CoreGui = cloneref(game:GetService("CoreGui"))
-else
-    UserInputService = game:GetService("UserInputService")
-    Players = game:GetService("Players")
-    RunService = game:GetService("RunService")
-    Stats = game:GetService("Stats")
-    CoreGui = game:GetService("CoreGui")
+local function safe_service(name)
+    local ok, svc = pcall(function() return cloneref and cloneref(game:GetService(name)) or game:GetService(name) end)
+    if not ok then warn("Failed to get:", name, svc) end
+    return ok and svc or nil
 end
+CoreGui = safe_service("CoreGui")
+Players = safe_service("Players")
+RunService = safe_service("RunService")
+Stats = safe_service("Stats")
+UserInputService = safe_service("UserInputService")
+TweenService = safe_service("TweenService")
+
+local hidden_UI_func = get_hidden_gui or gethui
 
 task.wait(0.1)
 local LocalPlayer = Players.LocalPlayer
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "TopBarUI"
-if get_hidden_gui or gethui then
-    local hiddenUI = get_hidden_gui or gethui
-    ScreenGui.Parent = hiddenUI() or CoreGui
-else
-    ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-end
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.ResetOnSpawn = false
-
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Name = "ToggleButton"
-ToggleButton.Parent = ScreenGui
-ToggleButton.Size = UDim2.new(0, 100, 0, 30)
-ToggleButton.Position = UDim2.new(1, -130, 0, 10)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-ToggleButton.BorderSizePixel = 0
-ToggleButton.TextColor3 = Color3.fromRGB(0, 255, 0)
-ToggleButton.TextScaled = true
-ToggleButton.Font = Enum.Font.SourceSansBold
-ToggleButton.Text = "Hide UI"
-
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 20)
-UICorner.Parent = ToggleButton
+ScreenGui.Parent = hidden_UI_func() or CoreGui or LocalPlayer:WaitForChild("PlayerGui")
 
 local UIContainer = Instance.new("Frame")
 UIContainer.Name = "UIContainer"
 UIContainer.Parent = ScreenGui
-UIContainer.Size = UDim2.new(0, 1105, 0, 40)
-UIContainer.Position = UDim2.new(0.5, -550, 0, 0)
-UIContainer.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-UIContainer.BackgroundTransparency = 0.2
+UIContainer.Size = UDim2.new(0, 980, 0, 40)
+UIContainer.Position = UDim2.new(0.5, -490, 0, 0)
+UIContainer.BackgroundColor3 = Color3.fromRGB(60,180,255)
+UIContainer.BackgroundTransparency = 0.15
 UIContainer.BorderSizePixel = 0
-UIContainer.Visible = true
 
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.CornerRadius = UDim.new(0, 10)
 UICorner.Parent = UIContainer
 
 local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(0, 0, 0)
+UIStroke.Color = Color3.fromRGB(100,200,255)
 UIStroke.Thickness = 1
 UIStroke.Parent = UIContainer
 
-local TimeLabel = Instance.new("TextLabel")
-TimeLabel.Name = "TimeLabel"
-TimeLabel.Parent = UIContainer
-TimeLabel.Size = UDim2.new(0, 150, 1, 0)
-TimeLabel.Position = UDim2.new(0, 0, 0, 0)
-TimeLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-TimeLabel.BackgroundTransparency = 1
-TimeLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-TimeLabel.TextScaled = true
-TimeLabel.Font = Enum.Font.SourceSansBold
-TimeLabel.Text = "Loading..."
+local function createButton(name, posX, text)
+    local btn = Instance.new("TextButton")
+    btn.Name = name
+    btn.Parent = ScreenGui
+    btn.Size = UDim2.new(0, 100, 0, 30)
+    btn.Position = UDim2.new(1, posX, 0, 10)
+    btn.BackgroundColor3 = Color3.fromRGB(35, 45, 60)
+    btn.BorderSizePixel = 0
+    btn.TextColor3 = Color3.fromRGB(60, 180, 255)
+    btn.TextScaled = true
+    btn.Font = Enum.Font.SourceSansBold
+    btn.Text = text
 
-local PingLabel = Instance.new("TextLabel")
-PingLabel.Name = "PingLabel"
-PingLabel.Parent = UIContainer
-PingLabel.Size = UDim2.new(0, 150, 1, 0)
-PingLabel.Position = UDim2.new(0, 160, 0, 0)
-PingLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-PingLabel.BackgroundTransparency = 1
-PingLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-PingLabel.TextScaled = true
-PingLabel.Font = Enum.Font.SourceSansBold
-PingLabel.Text = "Detecting Ping..."
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 15)
+    corner.Parent = btn
+    return btn
+end
 
-local FPSLabel = Instance.new("TextLabel")
-FPSLabel.Name = "FPSLabel"
-FPSLabel.Parent = UIContainer
-FPSLabel.Size = UDim2.new(0, 150, 1, 0)
-FPSLabel.Position = UDim2.new(0, 320, 0, 0)
-FPSLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-FPSLabel.BackgroundTransparency = 1
-FPSLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-FPSLabel.TextScaled = true
-FPSLabel.Font = Enum.Font.SourceSansBold
-FPSLabel.Text = "Detecting FPS..."
+local ToggleButton = createButton("ToggleButton", -240, "Hide UI")
+local ThemeButton = createButton("ThemeButton", -130, "Dark Mode")
 
-local ExecutorLabel = Instance.new("TextLabel")
-ExecutorLabel.Name = "ExecutorLabel"
-ExecutorLabel.Parent = UIContainer
-ExecutorLabel.Size = UDim2.new(0, 200, 1, 0)
-ExecutorLabel.Position = UDim2.new(0, 480, 0, 0)
-ExecutorLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-ExecutorLabel.BackgroundTransparency = 1
-ExecutorLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-ExecutorLabel.TextScaled = true
-ExecutorLabel.Font = Enum.Font.SourceSansBold
-ExecutorLabel.Text = "Detecting Executor..."
+local function newLabel(name, posX, text, width)
+    local label = Instance.new("TextLabel")
+    label.Name = name
+    label.Parent = UIContainer
+    label.Size = UDim2.new(0, width or 140, 1, 0)
+    label.Position = UDim2.new(0, posX, 0, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(180,220,255)
+    label.TextScaled = true
+    label.Font = Enum.Font.SourceSansBold
+    label.Text = text
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    return label
+end
 
-local PCStatusLabel = Instance.new("TextLabel")
-PCStatusLabel.Name = "PCStatusLabel"
-PCStatusLabel.Parent = UIContainer
-PCStatusLabel.Size = UDim2.new(0, 190, 1, 0)
-PCStatusLabel.Position = UDim2.new(0, 700, 0, 0)
-PCStatusLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-PCStatusLabel.BackgroundTransparency = 1
-PCStatusLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-PCStatusLabel.TextScaled = true
-PCStatusLabel.Font = Enum.Font.SourceSansBold
-PCStatusLabel.Text = "Detecting Device..."
+local TimeLabel = newLabel("TimeLabel", 10, "Loading...", 140)
+if TimeLabel.TextScaled then
+    TimeLabel.TextScaled = false
+    TimeLabel.TextSize = 22
+end
+TimeLabel.Position = UDim2.new(0, 10, 0, 0)
+TimeLabel.Size = UDim2.new(0, 160, 1, 0)
+local FPSLabel = newLabel("FPSLabel", 330, "Detecting FPS...", 85)
+FPSLabel.Size = UDim2.new(0, 85, 1, 0)
+local PingLabel = newLabel("PingLabel", 190, "Detecting Ping...", 110)
+PingLabel.Size = UDim2.new(0, 120, 1, 0)
+local ExecutorLabel = newLabel("ExecutorLabel", 430, "Detecting Executor...", 180)
+ExecutorLabel.Size = UDim2.new(0, 180, 1, 0)
+local PCStatusLabel = newLabel("PCStatusLabel", 620, "Detecting Device...", 180)
+PCStatusLabel.Size = UDim2.new(0, 180, 1, 0)
+local PlayerCountLabel = newLabel("PlayerCountLabel", 815, "Players: Detecting...", 160)
+PlayerCountLabel.Size = UDim2.new(0, 160, 1, 0)
 
 getgenv().Player_Counting_Value = true
-
-local PlayerCountLabel = Instance.new("TextLabel")
-PlayerCountLabel.Name = "PlayerCountLabel"
-PlayerCountLabel.Parent = UIContainer
-PlayerCountLabel.Size = UDim2.new(0, 200, 1, 0)
-PlayerCountLabel.Position = UDim2.new(0, 900, 0, 0)
-PlayerCountLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-PlayerCountLabel.BackgroundTransparency = 1
-PlayerCountLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-PlayerCountLabel.TextScaled = true
-PlayerCountLabel.Font = Enum.Font.SourceSansBold
-PlayerCountLabel.Text = "Players: Detecting..."
-
 task.spawn(function()
-   while getgenv().Player_Counting_Value == true do
-      local player_count = #Players:GetPlayers()
-      local max_players = Players.MaxPlayersInternal
-      PlayerCountLabel.Text = "Players: " .. tostring(player_count) .. "/" .. tostring(max_players)
-      task.wait(0.3)
-   end
+    while getgenv().Player_Counting_Value do
+        local count = #Players:GetPlayers()
+        local maxPlayers = Players.MaxPlayersInternal or "?"
+        PlayerCountLabel.Text = ("Players: %s/%s"):format(count, maxPlayers)
+        task.wait(0.3)
+    end
 end)
 
 local function getExecutor()
@@ -159,142 +114,169 @@ local function getExecutor()
     if identifyexecutor then
         name, version = identifyexecutor()
     end
-    return { Name = name or "Unknown Executor", Version = version or "Unknown Version" }
+    return { Name = name or "Unknown", Version = version or "?" }
 end
+task.spawn(function()
+    local det = getExecutor()
+    ExecutorLabel.Text = "Executor: "..det.Name.." (v"..det.Version..")"
+end)
 
 local function Device_Detector()
-    local UserInputService = UserInputService
+    local platform = UserInputService:GetPlatform()
+    local map = {
+        [Enum.Platform.Windows] = "Windows",
+        [Enum.Platform.OSX] = "MacOS",
+        [Enum.Platform.IOS] = "iOS",
+        [Enum.Platform.Android] = "Android",
+        [Enum.Platform.XBoxOne] = "Xbox One",
+        [Enum.Platform.PS4] = "PS4",
+        [Enum.Platform.XBox360] = "Xbox 360",
+        [Enum.Platform.WiiU] = "Wii-U",
+        [Enum.Platform.NX] = "Nintendo Switch",
+        [Enum.Platform.Ouya] = "Ouya",
+        [Enum.Platform.AndroidTV] = "Android TV",
+        [Enum.Platform.Chromecast] = "Chromecast",
+        [Enum.Platform.Linux] = "Linux",
+        [Enum.Platform.SteamOS] = "SteamOS",
+        [Enum.Platform.WebOS] = "WebOS",
+        [Enum.Platform.DOS] = "DOS",
+        [Enum.Platform.BeOS] = "BeOS",
+        [Enum.Platform.UWP] = "UWP",
+        [Enum.Platform.PS5] = "PS5",
+        [Enum.Platform.MetaOS] = "MetaOS",
+        [Enum.Platform.None] = "Unknown"
+    }
+    return map[platform] or "Unknown"
+end
+task.spawn(function()
+    PCStatusLabel.Text = "Device: "..Device_Detector()
+end)
 
-    if UserInputService:GetPlatform() == Enum.Platform.Windows then
-        return "Windows"
-    elseif UserInputService:GetPlatform() == Enum.Platform.OSX then
-        return "OSX" or "Apple Desktop"
-    elseif UserInputService:GetPlatform() == Enum.Platform.IOS then
-        return "iOS"
-    elseif UserInputService:GetPlatform() == Enum.Platform.Android then
-        return "Android"
-    elseif UserInputService:GetPlatform() == Enum.Platform.XBoxOne then
-        return "Xbox One (Console)"
-    elseif UserInputService:GetPlatform() == Enum.Platform.PS4 then
-        return "PS4 (Console)"
-    elseif UserInputService:GetPlatform() == Enum.Platform.XBox360 then
-        return "Xbox 360 (Console)"
-    elseif UserInputService:GetPlatform() == Enum.Platform.WiiU then
-        return "Wii-U (Console)"
-    elseif UserInputService:GetPlatform() == Enum.Platform.NX then
-        return "Cisco Nexus"
-    elseif UserInputService:GetPlatform() == Enum.Platform.Ouya then
-        return "Ouya (Android-Based)"
-    elseif UserInputService:GetPlatform() == Enum.Platform.AndroidTV then
-        return "Android TV"
-    elseif UserInputService:GetPlatform() == Enum.Platform.Chromecast then
-        return "Chromecast"
-    elseif UserInputService:GetPlatform() == Enum.Platform.Linux then
-        return "Linux (Desktop)"
-    elseif UserInputService:GetPlatform() == Enum.Platform.SteamOS then
-        return "Steam Client"
-    elseif UserInputService:GetPlatform() == Enum.Platform.WebOS then
-        return "Web-OS"
-    elseif UserInputService:GetPlatform() == Enum.Platform.DOS then
-        return "DOS"
-    elseif UserInputService:GetPlatform() == Enum.Platform.BeOS then
-        return "BeOS"
-    elseif UserInputService:GetPlatform() == Enum.Platform.UWP then
-        return "UWP (Go Back To Web Bro..)"
-    elseif UserInputService:GetPlatform() == Enum.Platform.PS5 then
-        return "PS5 (Console)"
-    elseif UserInputService:GetPlatform() == Enum.Platform.MetaOS then
-        return "MetaOS"
-    elseif UserInputService:GetPlatform() == Enum.Platform.None then
-        return "Unknown Device"
+local timeZones = {
+    ["-1200"]="AoE", ["-1100"]="SST", ["-1000"]="HST", ["-0930"]="MART",
+    ["-0900"]="AKST", ["-0800"]="PST", ["-0700"]="MST", ["-0600"]="CST",
+    ["-0500"]="EST", ["-0400"]="AST", ["-0330"]="NST", ["-0300"]="BRT",
+    ["-0200"]="GST", ["-0100"]="AZOST", ["+0000"]="UTC", ["+0100"]="CET",
+    ["+0200"]="EET", ["+0300"]="MSK", ["+0330"]="IRST", ["+0400"]="GST",
+    ["+0430"]="AFT", ["+0500"]="PKT", ["+0530"]="IST", ["+0545"]="NPT",
+    ["+0600"]="BST", ["+0630"]="MMT", ["+0700"]="ICT", ["+0800"]="CST",
+    ["+0845"]="ACWST", ["+0900"]="JST", ["+0930"]="ACST", ["+1000"]="AEST",
+    ["+1030"]="LHST", ["+1100"]="SBT", ["+1200"]="NZST", ["+1245"]="CHAST",
+    ["+1300"]="PHOT", ["+1400"]="LINT"
+}
+local function get_eastern_label(offset)
+    if offset == "-0500" or offset == "-0400" then
+        local month = tonumber(os.date("%m"))
+        if month >= 3 and month <= 11 then return "EDT" else return "EST" end
     end
 end
 
-local function detectExecutor()
-    local executorDetails = getExecutor()
-    return string.format("%s (v%s)", executorDetails.Name, executorDetails.Version)
+local function update_time()
+    getgenv().tickingTime = true
+    while getgenv().tickingTime do
+        local currentTime = os.time()
+        local offset = os.date("%z", currentTime)
+        local region = get_eastern_label(offset) or timeZones[offset] or "Unknown"
+        local formatted = os.date("%I:%M:%S %p", currentTime):gsub("^0","")
+        TimeLabel.Text = "Time: "..formatted.." ("..region..")"
+        task.wait(1.2)
+    end
 end
+task.spawn(update_time)
 
-task.spawn(function()
-    local executorName = detectExecutor()
-    ExecutorLabel.Text = "Executor: " .. executorName
+local frameCount, timeElapsed = 0, 0
+RunService.Heartbeat:Connect(function(deltaTime)
+    frameCount += 1
+    timeElapsed += deltaTime
+    if timeElapsed >= 1 then
+        FPSLabel.Text = "FPS: "..frameCount
+        frameCount = 0
+        timeElapsed = 0
+    end
 end)
 
-task.spawn(function()
-    PCStatusLabel.Text = "Device: " .. Device_Detector()
-end)
+local function updatePing()
+    getgenv().preserve_ping_tick = true
+    while getgenv().preserve_ping_tick do
+        local ping = math.floor(Stats.PerformanceStats.Ping:GetValue())
+        PingLabel.Text = "Ping: "..ping.." ms"
+        task.wait(0.6)
+    end
+end
+task.spawn(updatePing)
 
 local isUIVisible = true
-
 ToggleButton.MouseButton1Click:Connect(function()
     isUIVisible = not isUIVisible
     UIContainer.Visible = isUIVisible
     ToggleButton.Text = isUIVisible and "Hide UI" or "Show UI"
 end)
 
-getgenv().performance_stats = true
-
-local timeZones = {
-    ["-1200"] = "AoE", ["-1100"] = "SST", ["-1000"] = "HST", ["-0930"] = "MART",
-    ["-0900"] = "AKST", ["-0800"] = "PST", ["-0700"] = "MST", ["-0600"] = "CST",
-    ["-0500"] = "EST", ["-0400"] = "AST", ["-0330"] = "NST", ["-0300"] = "BRT",
-    ["-0200"] = "GST", ["-0100"] = "AZOST", ["+0000"] = "UTC", ["+0100"] = "CET",
-    ["+0200"] = "EET", ["+0300"] = "MSK", ["+0330"] = "IRST", ["+0400"] = "GST",
-    ["+0430"] = "AFT", ["+0500"] = "PKT", ["+0530"] = "IST", ["+0545"] = "NPT",
-    ["+0600"] = "BST", ["+0630"] = "MMT", ["+0700"] = "ICT", ["+0800"] = "CST",
-    ["+0845"] = "ACWST", ["+0900"] = "JST", ["+0930"] = "ACST", ["+1000"] = "AEST",
-    ["+1030"] = "LHST", ["+1100"] = "SBT", ["+1200"] = "NZST", ["+1245"] = "CHAST",
-    ["+1300"] = "PHOT", ["+1400"] = "LINT"
+local month = tonumber(os.date("%m"))
+local holidayThemes = {
+    [1]  = { light=Color3.fromRGB(0,255,255), dark=Color3.fromRGB(0,77,77) },
+    [2]  = { light=Color3.fromRGB(255,105,180), dark=Color3.fromRGB(102,0,51) },
+    [3]  = { light=Color3.fromRGB(0,255,127), dark=Color3.fromRGB(0,77,0) },
+    [4]  = { light=Color3.fromRGB(255,255,153), dark=Color3.fromRGB(102,102,0) },
+    [5]  = { light=Color3.fromRGB(255,153,255), dark=Color3.fromRGB(102,0,102) },
+    [6]  = { light=Color3.fromRGB(135,206,235), dark=Color3.fromRGB(30,63,102) },
+    [7]  = { light=Color3.fromRGB(255,85,85), dark=Color3.fromRGB(0,34,68) },
+    [8]  = { light=Color3.fromRGB(255,213,128), dark=Color3.fromRGB(153,76,0) },
+    [9]  = { light=Color3.fromRGB(210,180,140), dark=Color3.fromRGB(101,50,0) },
+    [10] = { light=Color3.fromRGB(255,140,0), dark=Color3.fromRGB(13,13,13) },
+    [11] = { light=Color3.fromRGB(255,165,0), dark=Color3.fromRGB(51,26,0) },
+    [12] = { light=Color3.fromRGB(135,206,250), dark=Color3.fromRGB(0,51,102) },
 }
+local currentTheme = holidayThemes[month] or { light=Color3.fromRGB(60,180,255), dark=Color3.fromRGB(20,25,40) }
+local isDarkMode = false
 
--- [[ fix for eastern (sometimes northern) regions that have multiple monthly zones. ]] --
-local function get_eastern_label(offset)
-    if offset == "-0500" or offset == "-0400" then
-        local month = tonumber(os.date("%m"))
-        if month >= 3 and month <= 11 then
-            return "EDT"
-        else
-            return "EST"
+local function updateColors()
+    local bgColor = isDarkMode and currentTheme.dark or currentTheme.light
+    local textColor = isDarkMode and Color3.fromRGB(200, 230, 255) or Color3.fromRGB(10, 10, 10)
+    local buttonBg = isDarkMode and Color3.fromRGB(35, 45, 60) or Color3.fromRGB(230, 230, 230)
+    local buttonText = isDarkMode and Color3.fromRGB(60, 180, 255) or Color3.fromRGB(20, 60, 100)
+
+    UIContainer.BackgroundColor3 = bgColor
+
+    for _, obj in ipairs(UIContainer:GetDescendants()) do
+        if obj:IsA("TextLabel") or obj:IsA("TextButton") then
+            obj.TextColor3 = textColor
         end
     end
+
+    ToggleButton.BackgroundColor3 = buttonBg
+    ThemeButton.BackgroundColor3 = buttonBg
+    ToggleButton.TextColor3 = textColor
+    ThemeButton.TextColor3 = textColor
 end
 
-local function update_time()
-    getgenv().tickingTime = true
-    while getgenv().tickingTime == true do
-        local currentTime = os.time()
-        local offset = os.date("%z", currentTime)
-        local regionTimeZone = get_eastern_label(offset) or timeZones[offset] or "Unknown Time Zone"
-        local formattedTime = os.date("%I:%M:%S %p", currentTime):gsub("^0", "")
-        TimeLabel.Text = "Time: "..string.format("%s (%s)", formattedTime, regionTimeZone)
-        task.wait(1.2)
-    end
-end
+ThemeButton.MouseButton1Click:Connect(function()
+    isDarkMode = not isDarkMode
+    updateColors()
+    ThemeButton.Text = isDarkMode and "Light Mode" or "Dark Mode"
+end)
+updateColors()
 
-task.spawn(update_time)
-
-local frameCount = 0
-local timeElapsed = 0
-
-RunService.Heartbeat:Connect(function(deltaTime)
-    frameCount = frameCount + 1
-    timeElapsed = timeElapsed + deltaTime
-    if timeElapsed >= 1 then
-        FPSLabel.Text = "FPS: "..tostring(frameCount)
-        frameCount = 0
-        timeElapsed = 0
+local dragging = false
+local dragStartX, startPos
+UIContainer.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStartX = input.Position.X
+        startPos = UIContainer.Position
     end
 end)
 
-task.wait()
-
-local function updatePing()
-    getgenv().preserve_ping_tick = true
-    while getgenv().preserve_ping_tick == true do
-        local ping = math.floor(Stats.PerformanceStats.Ping:GetValue())
-        PingLabel.Text = "Ping: "..tostring(ping).." ms"
-        task.wait(0.6)
+UIContainer.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position.X - dragStartX
+        local newX = startPos.X.Scale + delta / workspace.CurrentCamera.ViewportSize.X
+        UIContainer.Position = UDim2.new(newX, startPos.X.Offset, startPos.Y.Scale, startPos.Y.Offset)
     end
-end
+end)
 
-task.spawn(updatePing)
+UIContainer.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
