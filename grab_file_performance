@@ -81,7 +81,7 @@ local function newLabel(name, posX, text, width)
     return label
 end
 
-local TimeLabel = newLabel("TimeLabel", 10, "Loading...", 140)
+local TimeLabel = newLabel("TimeLabel", 10, "Loading...", 170)
 if TimeLabel.TextScaled then
     TimeLabel.TextScaled = false
     TimeLabel.TextSize = 22
