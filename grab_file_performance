@@ -87,7 +87,7 @@ if TimeLabel.TextScaled then
     TimeLabel.TextSize = 22
 end
 TimeLabel.Position = UDim2.new(0, 10, 0, 0)
-TimeLabel.Size = UDim2.new(0, 160, 1, 0)
+TimeLabel.Size = UDim2.new(0, 175, 1, 0)
 local FPSLabel = newLabel("FPSLabel", 330, "Detecting FPS...", 85)
 FPSLabel.Size = UDim2.new(0, 85, 1, 0)
 local PingLabel = newLabel("PingLabel", 190, "Detecting Ping...", 110)
