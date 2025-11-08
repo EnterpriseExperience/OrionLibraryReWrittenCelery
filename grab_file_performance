@@ -2,6 +2,7 @@ if getgenv().performance_stats then return end
 getgenv().performance_stats = true
 
 local CoreGui, Players, RunService, Stats, UserInputService, TweenService
+local Main_UI_Color = Color3.fromRGB(196,40,28)
 
 local function safe_service(name)
     local ok, svc = pcall(function() return cloneref and cloneref(game:GetService(name)) or game:GetService(name) end)
@@ -51,7 +52,7 @@ UIContainer.Name = "UIContainer"
 UIContainer.Parent = ScreenGui
 UIContainer.Size = UDim2.new(0, 490, 0, 40)
 UIContainer.Position = UDim2.new(0.59375, -490, 0, 0)
-UIContainer.BackgroundColor3 = Color3.fromRGB(196, 40, 28)
+UIContainer.BackgroundColor3 = Color3.fromRGB(196,40,28)
 UIContainer.BackgroundTransparency = 0.15
 UIContainer.BorderSizePixel = 0
 
@@ -291,6 +292,8 @@ ThemeButton.MouseButton1Click:Connect(function()
     ThemeButton.Text = isDarkMode and "Light Mode" or "Dark Mode"
 end)
 updateColors()
+wait(0.5)
+UIContainer.BackgroundColor3 = Main_UI_Color
 
 local dragging = false
 local dragStartX, startPos
