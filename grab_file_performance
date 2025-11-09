@@ -265,7 +265,7 @@ local holidayThemes = {
     [8]  = { light=Color3.fromRGB(255,213,128), dark=Color3.fromRGB(153,76,0) },
     [9]  = { light=Color3.fromRGB(210,180,140), dark=Color3.fromRGB(101,50,0) },
     [10] = { light=Color3.fromRGB(255,140,0), dark=Color3.fromRGB(13,13,13) },
-    [11] = { light=Color3.fromRGB(255,165,0), dark=Color3.fromRGB(51,26,0) },
+    [11] = { light=Color3.fromRGB(196,40,28), dark=Color3.fromRGB(51,26,0) },
     [12] = { light=Color3.fromRGB(135,206,250), dark=Color3.fromRGB(0,51,102) },
 }
 local currentTheme = holidayThemes[month] or { light=Color3.fromRGB(60,180,255), dark=Color3.fromRGB(20,25,40) }
