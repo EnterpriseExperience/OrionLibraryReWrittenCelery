@@ -302,24 +302,28 @@ UIContainer.BackgroundColor3 = Main_UI_Color
 
 local dragging = false
 local dragStartX, startPos
+
 UIContainer.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStartX = input.Position.X
-        startPos = UIContainer.Position
-    end
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStartX = input.Position.X
+		startPos = UIContainer.Position
+	end
 end)
 
-UIContainer.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position.X - dragStartX
-        local newX = startPos.X.Scale + delta / workspace.CurrentCamera.ViewportSize.X
-        UIContainer.Position = UDim2.new(newX, startPos.X.Offset, startPos.Y.Scale, startPos.Y.Offset)
-    end
-end)
+local function updateDrag(input)
+	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+		local delta = input.Position.X - dragStartX
+		local newX = startPos.X.Scale + delta / workspace.CurrentCamera.ViewportSize.X
+		UIContainer.Position = UDim2.new(newX, startPos.X.Offset, startPos.Y.Scale, startPos.Y.Offset)
+	end
+end
+
+UIContainer.InputChanged:Connect(updateDrag)
+UserInputService.InputChanged:Connect(updateDrag)
 
 UIContainer.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = false
-    end
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = false
+	end
 end)
