@@ -34,6 +34,7 @@ if getgenv().ForceMobileUI ~= nil then
     isMobile = getgenv().ForceMobileUI
 end
 
+local touch_enabled_mobile = UserInputService.TouchEnabled
 task.wait(0.1)
 local LocalPlayer = Players.LocalPlayer
 
@@ -51,7 +52,11 @@ local UIContainer = Instance.new("Frame")
 UIContainer.Name = "UIContainer"
 UIContainer.Parent = ScreenGui
 UIContainer.Size = UDim2.new(0, 490, 0, 40)
-UIContainer.Position = UDim2.new(0.59375, -490, 0, 0)
+if not touch_enabled_mobile then
+    UIContainer.Position = UDim2.new(0.59375, -490, 0, 0)
+else
+    UIContainer.Position = UDim2.new(0.59375, -420, 0, 0)
+end
 UIContainer.BackgroundColor3 = Color3.fromRGB(196,40,28)
 UIContainer.BackgroundTransparency = 0.15
 UIContainer.BorderSizePixel = 0
