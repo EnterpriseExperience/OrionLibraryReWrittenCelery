@@ -20,6 +20,14 @@ local camera = workspace:FindFirstChildOfClass("Camera")
 local viewport = camera and camera.ViewportSize or Vector2.new(1920,1080)
 local platform = UserInputService:GetPlatform()
 
+local function is_studio()
+    if RunService:IsStudio() then
+        return true
+    else
+        return false
+    end
+end
+
 local function detectMobile()
     local lowRes = viewport.X <= 900 or viewport.Y <= 500
     local mobilePlatform = (platform == Enum.Platform.IOS or platform == Enum.Platform.Android)
@@ -42,7 +50,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "TopBarUI"
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = hidden_UI_func() or CoreGui or LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Parent = is_studio() and LocalPlayer:WaitForChild("PlayerGui") or CoreGui
 
 local frameWidth = isMobile and 380 or 980
 local frameHeight = isMobile and 28 or 40
