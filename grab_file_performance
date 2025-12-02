@@ -1,14 +1,22 @@
 if getgenv().performance_stats then return end
 getgenv().performance_stats = true
 
-local CoreGui, Players, RunService, Stats, UserInputService, TweenService
-local Main_UI_Color = Color3.fromRGB(196,40,28)
+local Workspace, CoreGui, Players, RunService, Stats, UserInputService, TweenService
+local Main_UI_Color = Color3.fromRGB(196, 40, 28)
 
 local function safe_service(name)
-    local ok, svc = pcall(function() return cloneref and cloneref(game:GetService(name)) or game:GetService(name) end)
-    if not ok then warn("Failed to get:", name, svc) end
+    local ok, svc = pcall(function()
+        return cloneref and cloneref(game:GetService(name)) or game:GetService(name)
+    end)
+
+    if not ok then
+        return nil
+    end
+
     return ok and svc or nil
 end
+
+Workspace = safe_service("Workspace")
 CoreGui = safe_service("CoreGui")
 Players = safe_service("Players")
 RunService = safe_service("RunService")
@@ -16,7 +24,7 @@ Stats = safe_service("Stats")
 UserInputService = safe_service("UserInputService")
 TweenService = safe_service("TweenService")
 wait(0.1)
-local camera = workspace:FindFirstChildOfClass("Camera")
+local camera = Workspace.CurrentCamera or Workspace:FindFirstChildOfClass("Camera")
 local viewport = camera and camera.ViewportSize or Vector2.new(1920,1080)
 local platform = UserInputService:GetPlatform()
 
@@ -28,15 +36,14 @@ local function is_studio()
     end
 end
 
-local function detectMobile()
+local function detect_mob()
     local lowRes = viewport.X <= 900 or viewport.Y <= 500
     local mobilePlatform = (platform == Enum.Platform.IOS or platform == Enum.Platform.Android)
     local touchOnly = (UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled)
     return (lowRes and not UserInputService.KeyboardEnabled) or mobilePlatform or touchOnly
 end
 
-local hidden_UI_func = get_hidden_gui or gethui
-local isMobile = detectMobile()
+local isMobile = detect_mob()
 
 if getgenv().ForceMobileUI ~= nil then
     isMobile = getgenv().ForceMobileUI
@@ -45,12 +52,13 @@ end
 local touch_enabled_mobile = UserInputService.TouchEnabled
 task.wait(0.1)
 local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:FindFirstChildWhichIsA("PlayerGui") or LocalPlayer:WaitForChild("PlayerGui", 5)
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "TopBarUI"
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = is_studio() and LocalPlayer:WaitForChild("PlayerGui") or CoreGui
+ScreenGui.Parent = is_studio() and PlayerGui or CoreGui
 
 local frameWidth = isMobile and 380 or 980
 local frameHeight = isMobile and 28 or 40
@@ -74,7 +82,7 @@ UICorner.CornerRadius = UDim.new(0, isMobile and 6 or 10)
 UICorner.Parent = UIContainer
 
 local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(100,200,255)
+UIStroke.Color = Color3.fromRGB(100, 200, 255)
 UIStroke.Thickness = isMobile and 0.8 or 1
 UIStroke.Parent = UIContainer
 
@@ -152,7 +160,7 @@ getgenv().Player_Counting_Value = true
 task.spawn(function()
     while getgenv().Player_Counting_Value do
         local count = #Players:GetPlayers()
-        local maxPlayers = Players.MaxPlayersInternal or "?"
+        local maxPlayers = Players.MaxPlayersInternal or Players.MaxPlayers or "?"
         PlayerCountLabel.Text = ("Players:\n %s/%s"):format(count, maxPlayers)
         task.wait(0.3)
     end
@@ -167,7 +175,7 @@ local function getExecutor()
 end
 task.spawn(function()
     local det = getExecutor()
-    ExecutorLabel.Text = "Executor:\n "..det.Name.." (v"..det.Version..")"
+    ExecutorLabel.Text = "Executor:\n "..tostring(det.Name)
 end)
 
 local function Device_Detector()
@@ -195,8 +203,10 @@ local function Device_Detector()
         [Enum.Platform.MetaOS] = "MetaOS",
         [Enum.Platform.None] = "Unknown"
     }
+
     return map[platform] or "Unknown"
 end
+
 task.spawn(function()
     PCStatusLabel.Text = "Device:\n "..Device_Detector()
 end)
@@ -216,7 +226,11 @@ local timeZones = {
 local function get_eastern_label(offset)
     if offset == "-0500" or offset == "-0400" then
         local month = tonumber(os.date("%m"))
-        if month >= 3 and month <= 11 then return "EDT" else return "EST" end
+        if month >= 3 and month <= 11 then
+            return "EDT"
+        else
+            return "EST"
+        end
     end
 end
 
@@ -329,7 +343,6 @@ end
 
 UIContainer.InputChanged:Connect(updateDrag)
 UserInputService.InputChanged:Connect(updateDrag)
-
 UIContainer.InputEnded:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		dragging = false
