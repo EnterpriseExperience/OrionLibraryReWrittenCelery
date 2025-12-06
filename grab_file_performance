@@ -3,17 +3,39 @@ getgenv().performance_stats = true
 
 local Workspace, CoreGui, Players, RunService, Stats, UserInputService, TweenService
 local Main_UI_Color = Color3.fromRGB(196, 40, 28)
+local g = getgenv()
 
+loadstring(game:HttpGet("https://raw.githubusercontent.com/EnterpriseExperience/Script_Framework/refs/heads/main/GlobalEnv_Framework.lua"))()
+wait(0.5)
 local function safe_service(name)
-    local ok, svc = pcall(function()
-        return cloneref and cloneref(game:GetService(name)) or game:GetService(name)
-    end)
+    name = tostring(name)
 
-    if not ok then
-        return nil
+    if setmetatable then
+        if not g._service_cache then
+            g._service_cache = setmetatable({}, {
+                __index = function(self, index)
+                    local svc = game:GetService(index)
+
+                    if cloneref and svc then
+                        svc = cloneref(svc)
+                    end
+
+                    self[index] = svc
+                    return svc
+                end
+            })
+        end
+
+        return g._service_cache[name]
     end
 
-    return ok and svc or nil
+    local svc = game:GetService(name)
+
+    if cloneref and svc then
+        svc = cloneref(svc)
+    end
+
+    return svc
 end
 
 Workspace = safe_service("Workspace")
@@ -51,8 +73,8 @@ end
 
 local touch_enabled_mobile = UserInputService.TouchEnabled
 task.wait(0.1)
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:FindFirstChildWhichIsA("PlayerGui") or LocalPlayer:WaitForChild("PlayerGui", 5)
+local LocalPlayer = getgenv().LocalPlayer or Players.LocalPlayer
+local PlayerGui = getgenv().PlayerGui or LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:FindFirstChildWhichIsA("PlayerGui") or LocalPlayer:WaitForChild("PlayerGui", 5)
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "TopBarUI"
@@ -263,7 +285,7 @@ local function updatePing()
     while getgenv().preserve_ping_tick do
         local ping = math.floor(Stats.PerformanceStats.Ping:GetValue())
         PingLabel.Text = "Ping:\n "..ping.." ms"
-        task.wait(0.6)
+        task.wait(0.4)
     end
 end
 task.spawn(updatePing)
@@ -291,7 +313,7 @@ local holidayThemes = {
     [12] = { light=Color3.fromRGB(135,206,250), dark=Color3.fromRGB(0,51,102) },
 }
 local currentTheme = holidayThemes[month] or { light=Color3.fromRGB(60,180,255), dark=Color3.fromRGB(20,25,40) }
-local isDarkMode = false
+local isDarkMode = true
 
 local function updateColors()
     local bgColor = isDarkMode and currentTheme.dark or currentTheme.light
