@@ -5,12 +5,16 @@ getgenv().performance_stats = true
 local Workspace, CoreGui, Players, RunService, Stats, UserInputService, TweenService
 local g = getgenv()
 
-if not getgenv().InitializedAdonisAdmin_Bypass then
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua",true))()
-    wait(0.1)
-    getgenv().InitializedAdonisAdmin_Bypass = true
-end
-wait(0.5)
+task.spawn(function()
+    if getgenv().InitializedAdonisAdmin_Bypass then return end
+
+    if not getgenv().InitializedAdonisAdmin_Bypass then
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua",true))()
+        wait(0.1)
+        getgenv().InitializedAdonisAdmin_Bypass = true
+    end
+end)
+
 local function safe_service(name)
     name = tostring(name)
 
@@ -49,7 +53,7 @@ RunService = safe_service("RunService")
 Stats = safe_service("Stats")
 UserInputService = safe_service("UserInputService")
 TweenService = safe_service("TweenService")
-wait(0.1)
+
 local camera = Workspace.CurrentCamera or Workspace:FindFirstChildOfClass("Camera")
 local viewport = camera and camera.ViewportSize or Vector2.new(1920,1080)
 local platform = UserInputService:GetPlatform()
@@ -76,7 +80,6 @@ if getgenv().ForceMobileUI ~= nil then
 end
 
 local touch_enabled_mobile = UserInputService.TouchEnabled
-task.wait(0.1)
 local LocalPlayer = getgenv().LocalPlayer or Players.LocalPlayer
 local PlayerGui = getgenv().PlayerGui or LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:FindFirstChildWhichIsA("PlayerGui") or LocalPlayer:WaitForChild("PlayerGui", 5)
 
@@ -134,7 +137,6 @@ end
 
 local ToggleButton = createButton("ToggleButton", isMobile and -150 or -240, "Hide UI")
 local ThemeButton = createButton("ThemeButton", isMobile and -80 or -130, "Dark Mode")
-
 local function newLabel(name, pos, text, size)
     local label = Instance.new("TextLabel")
     label.Name = name
@@ -188,19 +190,20 @@ task.spawn(function()
         local count = #Players:GetPlayers()
         local maxPlayers = Players.MaxPlayersInternal or Players.MaxPlayers or "?"
         PlayerCountLabel.Text = ("Players:\n %s/%s"):format(count, maxPlayers)
-        task.wait(0.3)
+        task.wait(0.4)
     end
 end)
 
-local function getExecutor()
+local function get_exec()
     local name, version
     if identifyexecutor then
         name, version = identifyexecutor()
     end
     return { Name = name or "Unknown", Version = version or "?" }
 end
+
 task.spawn(function()
-    local det = getExecutor()
+    local det = get_exec()
     ExecutorLabel.Text = "Executor:\n "..tostring(det.Name)
 end)
 
@@ -249,6 +252,7 @@ local timeZones = {
     ["+1030"]="LHST", ["+1100"]="SBT", ["+1200"]="NZST", ["+1245"]="CHAST",
     ["+1300"]="PHOT", ["+1400"]="LINT"
 }
+
 local function get_eastern_label(offset)
     if offset == "-0500" or offset == "-0400" then
         local month = tonumber(os.date("%m"))
@@ -260,45 +264,102 @@ local function get_eastern_label(offset)
     end
 end
 
+local isUIVisible = true
+local cached_offset = os.date("%z")
+local cached_region = get_eastern_label(cached_offset) or timeZones[cached_offset] or "Unknown"
+local last_minute = tonumber(os.date("%M"))
 local function update_time()
+    if getgenv().tickingTime then return end
     getgenv().tickingTime = true
-    while getgenv().tickingTime do
-        local currentTime = os.time()
-        local offset = os.date("%z", currentTime)
-        local region = get_eastern_label(offset) or timeZones[offset] or "Unknown"
-        local formatted = os.date("%I:%M:%S %p", currentTime):gsub("^0","")
-        TimeLabel.Text = "Time:\n "..formatted.." ("..region..")"
-        task.wait(1.2)
+
+    while getgenv().tickingTime == true do
+        if not isUIVisible then
+            task.wait(1.5)
+        else
+            local current = os.time()
+            local minute = tonumber(os.date("%M", current))
+
+            if minute ~= last_minute then
+                cached_offset = os.date("%z")
+                cached_region = get_eastern_label(cached_offset) or timeZones[cached_offset] or "Unknown"
+                last_minute = minute
+            end
+
+            local formatted = os.date("%I:%M:%S %p", current):gsub("^0","")
+            local newtext = "Time:\n "..formatted.." ("..cached_region..")"
+
+            if TimeLabel.Text ~= newtext then
+                TimeLabel.Text = newtext
+            end
+
+            task.wait(1.2)
+        end
     end
 end
+
 task.spawn(update_time)
 
 local frameCount, timeElapsed = 0, 0
-RunService.Heartbeat:Connect(function(deltaTime)
-    frameCount += 1
-    timeElapsed += deltaTime
-    if timeElapsed >= 1 then
-        FPSLabel.Text = "FPS:\n "..frameCount
-        frameCount = 0
-        timeElapsed = 0
-    end
-end)
+local fps_connection
+local function start_fps()
+    if fps_connection then return end
 
-local function updatePing()
-    getgenv().preserve_ping_tick = true
-    while getgenv().preserve_ping_tick do
-        local ping = math.floor(Stats.PerformanceStats.Ping:GetValue())
-        PingLabel.Text = "Ping:\n "..ping.." ms"
-        task.wait(0.4)
+    fps_connection = RunService.Heartbeat:Connect(function(dt)
+        frameCount += 1
+        timeElapsed += dt
+
+        if timeElapsed >= 1 then
+            local newtext = "FPS:\n "..frameCount
+            if FPSLabel.Text ~= newtext then
+                FPSLabel.Text = newtext
+            end
+            frameCount = 0
+            timeElapsed = 0
+        end
+    end)
+end
+
+local function stop_fps()
+    if fps_connection then
+        fps_connection:Disconnect()
+        fps_connection = nil
     end
 end
+
+start_fps()
+
+local function updatePing()
+    if getgenv().preserve_ping_tick then return end
+    getgenv().preserve_ping_tick = true
+
+    local last_ping
+
+    while getgenv().preserve_ping_tick == true do
+        if not isUIVisible then
+            task.wait(1.5)
+        else
+            local ping = math.floor(Stats.PerformanceStats.Ping:GetValue())
+            if ping ~= last_ping then
+                PingLabel.Text = "Ping:\n "..ping.." ms"
+                last_ping = ping
+            end
+            task.wait(1.5)
+        end
+    end
+end
+
 task.spawn(updatePing)
 
-local isUIVisible = true
 ToggleButton.MouseButton1Click:Connect(function()
     isUIVisible = not isUIVisible
     UIContainer.Visible = isUIVisible
     ToggleButton.Text = isUIVisible and "Hide UI" or "Show UI"
+
+    if isUIVisible then
+        start_fps()
+    else
+        stop_fps()
+    end
 end)
 
 local month = tonumber(os.date("%m"))
@@ -344,32 +405,53 @@ ThemeButton.MouseButton1Click:Connect(function()
     updateColors()
     ThemeButton.Text = isDarkMode and "Light Mode" or "Dark Mode"
 end)
-wait(1)
+task.wait(1)
 updateColors()
-
 local dragging = false
-local dragStartX, startPos
+local drag_input
+local drag_start
+local start_pos
+local drag_conn
 
 UIContainer.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+
 		dragging = true
-		dragStartX = input.Position.X
-		startPos = UIContainer.Position
+		drag_input = input
+		drag_start = input.Position
+		start_pos = UIContainer.Position
+
+		if drag_conn then
+			drag_conn:Disconnect()
+		end
+
+		drag_conn = UserInputService.InputChanged:Connect(function(inp)
+			if dragging and inp == drag_input then
+				local cam = Workspace.CurrentCamera
+				if cam then
+					local delta = inp.Position.X - drag_start.X
+					local scale = delta / cam.ViewportSize.X
+					UIContainer.Position = UDim2.new(
+						start_pos.X.Scale + scale,
+						start_pos.X.Offset,
+						start_pos.Y.Scale,
+						start_pos.Y.Offset
+					)
+				end
+			end
+		end)
 	end
 end)
 
-local function updateDrag(input)
-	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-		local delta = input.Position.X - dragStartX
-		local newX = startPos.X.Scale + delta / workspace.CurrentCamera.ViewportSize.X
-		UIContainer.Position = UDim2.new(newX, startPos.X.Offset, startPos.Y.Scale, startPos.Y.Offset)
-	end
-end
-
-UIContainer.InputChanged:Connect(updateDrag)
-UserInputService.InputChanged:Connect(updateDrag)
 UIContainer.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+	if input == drag_input then
 		dragging = false
+		drag_input = nil
+
+		if drag_conn then
+			drag_conn:Disconnect()
+			drag_conn = nil
+		end
 	end
 end)
