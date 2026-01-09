@@ -5,16 +5,6 @@ getgenv().performance_stats = true
 local Workspace, CoreGui, Players, RunService, Stats, UserInputService, TweenService
 local g = getgenv()
 
-task.spawn(function()
-    if getgenv().InitializedAdonisAdmin_Bypass then return end
-
-    if not getgenv().InitializedAdonisAdmin_Bypass then
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua",true))()
-        wait(0.1)
-        getgenv().InitializedAdonisAdmin_Bypass = true
-    end
-end)
-
 local function safe_service(name)
     name = tostring(name)
 
@@ -74,6 +64,48 @@ local function detect_mob()
 end
 
 local isMobile = detect_mob()
+
+local executor_string = nil
+local function executor_contains(substr)
+    if type(executor_string) ~= "string" then
+        return false
+    end
+    return string.find(string.lower(executor_string), string.lower(substr), 1, true) ~= nil
+end
+
+local function retrieve_executor()
+    local name
+    if identifyexecutor then
+        name = identifyexecutor()
+    end
+    return { Name = name or "Unknown Executor" }
+end
+
+local function identify_executor()
+    local executorinfo = retrieve_executor()
+    return tostring(executorinfo.Name)
+end
+
+executor_string = identify_executor()
+
+function low_level_executor()
+    if executor_contains("solara") then return true end
+    if executor_contains("jjsploit") then return true end
+    if executor_contains("xeno") then return true end
+    return false
+end
+
+if not low_level_executor() then
+    task.spawn(function()
+        if getgenv().InitializedAdonisAdmin_Bypass then return end
+
+        if not getgenv().InitializedAdonisAdmin_Bypass then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua",true))()
+            wait(0.1)
+            getgenv().InitializedAdonisAdmin_Bypass = true
+        end
+    end)
+end
 
 if getgenv().ForceMobileUI ~= nil then
     isMobile = getgenv().ForceMobileUI
@@ -300,11 +332,12 @@ end
 task.spawn(update_time)
 
 local frameCount, timeElapsed = 0, 0
-local fps_connection
-local function start_fps()
-    if fps_connection then return end
+getgenv().fps_updater_connection = getgenv().fps_updater_connection or nil
 
-    fps_connection = RunService.Heartbeat:Connect(function(dt)
+local function start_fps()
+    if getgenv().fps_updater_connection then return end
+
+    getgenv().fps_updater_connection = RunService.Heartbeat:Connect(function(dt)
         frameCount += 1
         timeElapsed += dt
 
@@ -320,9 +353,9 @@ local function start_fps()
 end
 
 local function stop_fps()
-    if fps_connection then
-        fps_connection:Disconnect()
-        fps_connection = nil
+    if getgenv().fps_updater_connection then
+        getgenv().fps_updater_connection:Disconnect()
+        getgenv().fps_updater_connection = nil
     end
 end
 
