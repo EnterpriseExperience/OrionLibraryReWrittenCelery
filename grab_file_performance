@@ -57,7 +57,7 @@ local function is_studio()
     end
 end
 
-getgenv().dragify = getgenv().dragify or function(Frame)
+getgenv().dragify_performance_statistics_GUI = function(Frame)
     local UIS = cloneref and cloneref(game:GetService("UserInputService")) or game:GetService("UserInputService")
     local TS = cloneref and cloneref(game:GetService("TweenService")) or game:GetService("TweenService")
 
@@ -493,6 +493,6 @@ ThemeButton.MouseButton1Click:Connect(function()
 end)
 task.wait(1)
 updateColors()
-if getgenv().dragify and typeof(getgenv().dragify) == "function" then
-    dragify(UIContainer)
+if getgenv().dragify_performance_statistics_GUI and typeof(getgenv().dragify_performance_statistics_GUI) == "function" then
+    getgenv().dragify_performance_statistics_GUI(UIContainer)
 end
