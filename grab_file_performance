@@ -47,13 +47,67 @@ TweenService = safe_service("TweenService")
 local camera = Workspace.CurrentCamera or Workspace:FindFirstChildOfClass("Camera")
 local viewport = camera and camera.ViewportSize or Vector2.new(1920,1080)
 local platform = UserInputService:GetPlatform()
-
+local UIS = UserInputService or cloneref and cloneref(game:GetService("UserInputService")) or game:GetService("UserInputService")
+local TS = TweenService or cloneref and cloneref(game:GetService("TweenService")) or game:GetService("TweenService")
 local function is_studio()
     if RunService:IsStudio() then
         return true
     else
         return false
     end
+end
+
+getgenv().dragify = getgenv().dragify or function(Frame)
+    local UIS = cloneref and cloneref(game:GetService("UserInputService")) or game:GetService("UserInputService")
+    local TS = cloneref and cloneref(game:GetService("TweenService")) or game:GetService("TweenService")
+
+    if not Frame or not Frame:IsA("GuiObject") then return end
+
+    local dragging = false
+    local dragStart, startPos, drag_input
+    local activeTween
+
+    local function safeTween(pos)
+        if activeTween then
+            activeTween:Cancel()
+        end
+        activeTween = TS:Create(Frame, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {Position = pos})
+        activeTween:Play()
+    end
+
+    local function update(input)
+        if not (dragging and startPos and drag_input) then return end
+        local delta = input.Position - dragStart
+        local pos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset)
+        safeTween(pos)
+    end
+
+    Frame.InputBegan:Connect(function(input)
+        if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and UIS:GetFocusedTextBox() == nil then
+            dragging = true
+            dragStart = input.Position
+            startPos = Frame.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                    if activeTween then activeTween:Cancel() end
+                end
+            end)
+        end
+    end)
+
+    Frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            drag_input = input
+        end
+    end)
+
+    UIS.InputChanged:Connect(function(input)
+        if input == drag_input and dragging then
+            update(input)
+        end
+    end)
 end
 
 local function detect_mob()
@@ -64,7 +118,6 @@ local function detect_mob()
 end
 
 local isMobile = detect_mob()
-
 local executor_string = nil
 local function executor_contains(substr)
     if type(executor_string) ~= "string" then
@@ -440,51 +493,6 @@ ThemeButton.MouseButton1Click:Connect(function()
 end)
 task.wait(1)
 updateColors()
-local dragging = false
-local drag_input
-local drag_start
-local start_pos
-local drag_conn
-
-UIContainer.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1
-	or input.UserInputType == Enum.UserInputType.Touch then
-
-		dragging = true
-		drag_input = input
-		drag_start = input.Position
-		start_pos = UIContainer.Position
-
-		if drag_conn then
-			drag_conn:Disconnect()
-		end
-
-		drag_conn = UserInputService.InputChanged:Connect(function(inp)
-			if dragging and inp == drag_input then
-				local cam = Workspace.CurrentCamera
-				if cam then
-					local delta = inp.Position.X - drag_start.X
-					local scale = delta / cam.ViewportSize.X
-					UIContainer.Position = UDim2.new(
-						start_pos.X.Scale + scale,
-						start_pos.X.Offset,
-						start_pos.Y.Scale,
-						start_pos.Y.Offset
-					)
-				end
-			end
-		end)
-	end
-end)
-
-UIContainer.InputEnded:Connect(function(input)
-	if input == drag_input then
-		dragging = false
-		drag_input = nil
-
-		if drag_conn then
-			drag_conn:Disconnect()
-			drag_conn = nil
-		end
-	end
-end)
+if getgenv().dragify and typeof(getgenv().dragify) == "function" then
+    dragify(UIContainer)
+end
