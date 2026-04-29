@@ -4,7 +4,6 @@ getgenv().performance_stats = true
 
 local Workspace, CoreGui, Players, RunService, Stats, UserInputService, TweenService
 local g = getgenv()
-
 local function safe_service(name)
     name = tostring(name)
 
@@ -146,18 +145,6 @@ function low_level_executor()
     if executor_contains("jjsploit") then return true end
     if executor_contains("xeno") then return true end
     return false
-end
-
-if not low_level_executor() then
-    task.spawn(function()
-        if getgenv().InitializedAdonisAdmin_Bypass then return end
-
-        if not getgenv().InitializedAdonisAdmin_Bypass then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua",true))()
-            wait(0.1)
-            getgenv().InitializedAdonisAdmin_Bypass = true
-        end
-    end)
 end
 
 if getgenv().ForceMobileUI ~= nil then
